@@ -1,8 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"lista/api/server"
+	"log"
+)
 
+var version = "Version 1"
+var name = "Lista-API"
 
 func main() {
-	fmt.Println("hello world wowowo")
+	log.Println("Starting", name, version)
+	server.Start(":1337")
 }
