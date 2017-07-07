@@ -48,9 +48,13 @@ func protected(next http.HandlerFunc) http.HandlerFunc {
 
 		var claims UserClaims
 
-		token, err := request.ParseFromRequestWithClaims(r, request.OAuth2Extractor, &claims, func(token *jwt.Token) (interface{}, error) {
+		//NOTE: A token can be accessed here and it prob
+		//should be passed along via context
+		_, err := request.ParseFromRequestWithClaims(r, request.OAuth2Extractor, &claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte("foobar"), nil
 		})
+
+
 		log.Println(claims)
 		// If the token is missing or invalid, return error
 		if err != nil {
