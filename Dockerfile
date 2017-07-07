@@ -3,5 +3,6 @@ RUN mkdir -p /go/src/lista/api/
 COPY src /go/src/lista/api/
 WORKDIR /go/src/lista/api/
 
-RUN go build -o app main.go
-CMD ["./app"]
+RUN go-wrapper download
+RUN go-wrapper install
+CMD ["go-wrapper","run"]
