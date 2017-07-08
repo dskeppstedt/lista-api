@@ -1,17 +1,23 @@
 package main
 
 import (
-	"lista/api/server"
 	"lista/api/db"
+	"lista/api/server"
 	"log"
 )
 
 var version = "Version 1"
 var name = "Lista-API"
 
+//Global accesse to database
+var DbM *db.Mongodb
+
 func main() {
-	m := db.NewMongoDb("db")
-	m.Connect()
+
+	DbM := db.NewMongoDb("db")
+	DbM.Connect()
+	server.DbStore = DbM
+
 	log.Println("Starting", name, version)
 	server.Start(":1337")
 }

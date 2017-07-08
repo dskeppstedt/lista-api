@@ -1,8 +1,10 @@
 package db
 
 import (
-	"gopkg.in/mgo.v2"
+	"lista/api/models"
 	"log"
+
+	"gopkg.in/mgo.v2"
 )
 
 type Db interface {
@@ -11,7 +13,8 @@ type Db interface {
 }
 
 type Mongodb struct {
-	Url string
+	Url     string
+	Session *mgo.Session
 }
 
 func NewMongoDb(url string) (m *Mongodb) {
@@ -19,11 +22,8 @@ func NewMongoDb(url string) (m *Mongodb) {
 	return
 }
 
-type Info struct {
-	Name    string `bson:"name" json:"name"`
-	Version int    `bson:"version" json:"version"`
-}
-
+//Connect establish a connection to mongodb.
+//If it fails, it will retry five times.
 func (this *Mongodb) Connect() {
 	tries := 5
 
@@ -39,13 +39,14 @@ func (this *Mongodb) Connect() {
 			break
 		}
 	}
+	this.Session = session
+}
 
-	var result Info
+func (this *Mongodb) GetAppInfo() models.Info {
+	session := this.Session
+	var result models.Info
 	c := session.DB("lista").C("info")
 	c.Find(nil).One(&result)
 	log.Println(result)
-}
-
-func (this *Mongodb) GetAppName() {
-	//TODO
+	return result
 }
