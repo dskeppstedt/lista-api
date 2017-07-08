@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"lista/api/db"
 	"log"
 	"net/http"
 	"time"
@@ -9,6 +10,8 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	request "github.com/dgrijalva/jwt-go/request"
 )
+
+var DbStore *db.Mongodb
 
 //Start is used to start listening for http requests
 //Parameters:
@@ -21,6 +24,7 @@ func Start(port string) {
 
 func setupRoutes() {
 	http.HandleFunc("/", timer(hello))
+	http.HandleFunc("/info", timer(appInfo))
 	http.HandleFunc("/auth", timer(auth))
 	http.HandleFunc("/profile", timer(protected(profile)))
 }
