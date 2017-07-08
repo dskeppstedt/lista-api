@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"context"
+
 	jwt "github.com/dgrijalva/jwt-go"
 	request "github.com/dgrijalva/jwt-go/request"
 )
@@ -23,17 +25,9 @@ func Start(port string) {
 }
 
 func setupRoutes() {
-	http.HandleFunc("/", timer(hello))
 	http.HandleFunc("/info", timer(appInfo))
 	http.HandleFunc("/auth", timer(auth))
 	http.HandleFunc("/profile", timer(protected(profile)))
-}
-
-//HANDLERS
-func hello(response http.ResponseWriter, request *http.Request) {
-
-	response.WriteHeader(200)
-	response.Write([]byte("Hello!\n"))
 }
 
 //MIDDLEWARE
@@ -52,14 +46,12 @@ func protected(next http.HandlerFunc) http.HandlerFunc {
 
 		var claims UserClaims
 
-		//NOTE: A token can be accessed here and it prob
-		//should be passed along via context
-		_, err := request.ParseFromRequestWithClaims(r, request.OAuth2Extractor, &claims, func(token *jwt.Token) (interface{}, error) {
+		token, err := request.ParseFromRequestWithClaims(r, request.OAuth2Extractor, &claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte("foobar"), nil
 		})
 
-
 		log.Println(claims)
+		log.Println(token)
 		// If the token is missing or invalid, return error
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -68,6 +60,9 @@ func protected(next http.HandlerFunc) http.HandlerFunc {
 
 			return
 		}
-		next.ServeHTTP(w, r)
+
+		//add the user claim to the context
+		ctx := context.WithValue(r.Context(), "USER-CLAIM", claims)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

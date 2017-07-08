@@ -6,5 +6,6 @@ import (
 )
 
 func profile(response http.ResponseWriter, request *http.Request) {
-	fmt.Fprintln(response, "Welcome to your profile!")
+	user := request.Context().Value("USER-CLAIM").(UserClaims)
+	fmt.Fprintln(response, "Welcome", user.Email)
 }
