@@ -14,6 +14,8 @@ type Db interface {
 	Connect()
 	GetAppInfo()
 	CreateUser()
+	GetUser()
+	UpdateUserWithTokens()
 	ExistUser()
 	CorrectUserPassword()
 }
@@ -64,6 +66,14 @@ func (this *Mongodb) CreateUser(user models.User) error {
 	return err
 }
 
+func (this *Mongodb) GetUser(email string) (models.User, error) {
+	session := this.Session
+	c := session.DB("lista").C("users")
+	result := models.User{}
+	err := c.Find(bson.M{"email": email}).One(&result)
+	return result, err
+}
+
 func (this *Mongodb) ExistUser(email string) bool {
 	session := this.Session
 	c := session.DB("lista").C("users")
@@ -94,5 +104,20 @@ func (this *Mongodb) CorrectUserPassword(user models.User) bool {
 		return false
 	}
 
+	return true
+}
+
+func (this *Mongodb) UpdateUserWithToken(user models.User, refresh string) bool {
+	session := this.Session
+	c := session.DB("lista").C("users")
+
+	userQuery := bson.M{"email": user.Email}
+	update := bson.M{"$set": bson.M{"refresh_token": refresh}}
+
+	err := c.Update(userQuery, update)
+	if err != nil {
+		log.Println("Update could not be performed", err)
+		return false
+	}
 	return true
 }

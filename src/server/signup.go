@@ -52,14 +52,33 @@ func signup(response http.ResponseWriter, request *http.Request) {
 	//else.. create jwt token and refresh token and send that along
 
 	//create refresh token
+	refresh, err := util.GenerateRandomString(32)
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(response, "Could not create refresh token")
+		return
+	}
 
 	//store refresh token with the user
+	if !DbStore.UpdateUserWithToken(user, refresh) {
+		response.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(response, "Could not update user w token")
+		return
+	}
 
 	//create jwt token
+	jwt, err := util.CreateToken(user.Email)
+
+	if err != nil {
+		log.Println(err)
+		response.WriteHeader(500)
+		fmt.Fprintln(response, "A token could not be issued")
+		return
+	}
 
 	//send both tokens back to client
 
-	ut := models.NewUserTokens("a", "b")
+	ut := models.NewUserTokens(jwt, refresh)
 
 	json.NewEncoder(response).Encode(ut)
 

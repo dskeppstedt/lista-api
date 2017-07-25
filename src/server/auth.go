@@ -47,14 +47,16 @@ func auth(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	//TODO: or if refreshtoken is present use that..
+
 	//and the password is correct
 	if !DbStore.CorrectUserPassword(user) {
 		response.WriteHeader(http.StatusForbidden)
 		fmt.Fprintln(response, "Wrong username/password combination")
+		return
 	}
 
-	//TODO: or if refreshtoken is present use that..
-
+	//FROM HERE THE USER IS AUTHORIZED
 
 	//create token and send it!
 	token, error := util.CreateToken(user.Email)
@@ -66,10 +68,16 @@ func auth(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	response.Header().Set("Content-Type", "application/jwt")
-	response.WriteHeader(200)
-	fmt.Fprintln(response, token)
-}
+	usr, err := DbStore.GetUser(user.Email)
+	if err != nil {
+		log.Println("Error get user", err)
+		response.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(response, "Could not get user")
+		return
+	}
 
-
+	response.Header().Set("Content-Type", "application/json")
+	//send both tokens back to client
+	ut := models.NewUserTokens(token, usr.Refresh)
+	json.NewEncoder(response).Encode(ut)
 }
