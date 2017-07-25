@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"io/ioutil"
+	"lista/api/models"
 	"log"
 	"net/http"
 
@@ -13,12 +14,8 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-type User struct {
-	Email    string
-	Password string
-}
-
 func auth(response http.ResponseWriter, request *http.Request) {
+
 	//make sure that this is a post request
 	if request.Method != "POST" {
 		response.WriteHeader(http.StatusMethodNotAllowed)
@@ -37,7 +34,7 @@ func auth(response http.ResponseWriter, request *http.Request) {
 
 	log.Println(string(body))
 
-	var user User
+	var user models.User
 	error = json.Unmarshal(body, &user)
 	if error != nil {
 		log.Println("Could not parse body")
@@ -46,13 +43,21 @@ func auth(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	//check that the user exists and the password is correct
-
-	if user.Email != "email@email.com" || user.Password != "123" {
-		response.WriteHeader(http.StatusForbidden)
-		fmt.Fprintln(response, "User not authorized")
+	//check that the user exists
+	if !DbStore.ExistUser(user.Email) {
+		response.WriteHeader(http.StatusNotFound)
+		fmt.Fprintln(response, "User does not exist")
 		return
 	}
+
+	//and the password is correct
+	if !DbStore.CorrectUserPassword(user) {
+		response.WriteHeader(http.StatusForbidden)
+		fmt.Fprintln(response, "Wrong username/password combination")
+	}
+
+	//TODO: or if refreshtoken is present use that..
+
 
 	//create token and send it!
 	token, error := createToken(user.Email)

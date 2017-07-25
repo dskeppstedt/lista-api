@@ -1,15 +1,21 @@
 package db
 
 import (
+	"fmt"
 	"lista/api/models"
 	"log"
 
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Db interface {
 	Connect()
-	GetAppName()
+	GetAppInfo()
+	CreateUser()
+	ExistUser()
+	CorrectUserPassword()
 }
 
 type Mongodb struct {
@@ -49,4 +55,44 @@ func (this *Mongodb) GetAppInfo() models.Info {
 	c.Find(nil).One(&result)
 	log.Println(result)
 	return result
+}
+
+func (this *Mongodb) CreateUser(user models.User) error {
+	session := this.Session
+	collection := session.DB("lista").C("users")
+	err := collection.Insert(user)
+	return err
+}
+
+func (this *Mongodb) ExistUser(email string) bool {
+	session := this.Session
+	c := session.DB("lista").C("users")
+
+	result := models.User{}
+	err := c.Find(bson.M{"email": email}).One(&result)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	fmt.Println("Found user", result)
+	return true
+}
+
+//TODO: refactor cuz code smells
+func (this *Mongodb) CorrectUserPassword(user models.User) bool {
+	session := this.Session
+	c := session.DB("lista").C("users")
+	result := models.User{}
+	err := c.Find(bson.M{"email": user.Email}).One(&result)
+	if err != nil {
+		log.Println("CorrectUserPassword", err)
+		return false
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(user.Password)); err != nil {
+		return false
+	}
+
+	return true
 }

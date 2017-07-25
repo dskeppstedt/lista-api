@@ -20,17 +20,52 @@ var DbStore *db.Mongodb
 // - port, the port that the conneciton will use
 func Start(port string) {
 	setupRoutes()
-	log.Println("Accepting requestons on port", port)
+	log.Println("Listening on port", port)
 	http.ListenAndServe(port, nil)
 }
 
 func setupRoutes() {
-	http.HandleFunc("/info", timer(appInfo))
-	http.HandleFunc("/auth", timer(auth))
+	http.HandleFunc("/info", timer(cors(appInfo)))
+	http.HandleFunc("/signup", timer(cors(post(signup))))
+	http.HandleFunc("/auth", timer(cors(auth)))
 	http.HandleFunc("/profile", timer(protected(profile)))
+
 }
 
 //MIDDLEWARE
+
+func cors(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
+
+		//		if origin := request.Header.Get("Origin"); origin != "" {
+		response.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+		response.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		//}
+
+		if request.Method == "OPTIONS" {
+			response.WriteHeader(200)
+			return
+		}
+
+		next.ServeHTTP(response, request)
+
+	})
+}
+
+func post(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Method != "POST" {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			fmt.Fprintln(w, "Only POST is allowed")
+			return
+		}
+
+		next.ServeHTTP(w, r)
+
+	})
+}
+
 func timer(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		before := time.Now()
