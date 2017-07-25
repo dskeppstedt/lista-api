@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"lista/api/db"
+	"lista/api/util"
 	"log"
 	"net/http"
 	"time"
@@ -79,7 +80,7 @@ func protected(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get token from request
 
-		var claims UserClaims
+		var claims util.UserClaims
 
 		token, err := request.ParseFromRequestWithClaims(r, request.OAuth2Extractor, &claims, func(token *jwt.Token) (interface{}, error) {
 			return []byte("foobar"), nil

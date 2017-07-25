@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"lista/api/models"
+	"lista/api/util"
 	"log"
 	"net/http"
 
@@ -56,7 +57,7 @@ func auth(response http.ResponseWriter, request *http.Request) {
 
 
 	//create token and send it!
-	token, error := createToken(user.Email)
+	token, error := util.CreateToken(user.Email)
 	if error != nil {
 		log.Println("Signing error")
 		log.Println(error)
