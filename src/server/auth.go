@@ -7,11 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"time"
-
 	"fmt"
-
-	jwt "github.com/dgrijalva/jwt-go"
 )
 
 func auth(response http.ResponseWriter, request *http.Request) {
@@ -74,17 +70,5 @@ func auth(response http.ResponseWriter, request *http.Request) {
 	fmt.Fprintln(response, token)
 }
 
-//source https://github.com/dgrijalva/jwt-go/blob/master/http_example_test.go
 
-type UserClaims struct {
-	*jwt.StandardClaims
-	Email string
-}
-
-func createToken(email string) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims = &UserClaims{
-		&jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Minute * 10).Unix()},
-		email}
-	return token.SignedString([]byte("foobar"))
 }
