@@ -18,6 +18,7 @@ type Db interface {
 	UpdateUserWithTokens()
 	ExistUser()
 	CorrectUserPassword()
+	CorrectRefreshToken()
 }
 
 type Mongodb struct {
@@ -120,4 +121,17 @@ func (this *Mongodb) UpdateUserWithToken(user models.User, refresh string) bool 
 		return false
 	}
 	return true
+}
+
+func (this *Mongodb) CorrectRefreshToken(user models.User) bool {
+	session := this.Session
+	c := session.DB("lista").C("users")
+	result := models.User{}
+	err := c.Find(bson.M{"email": user.Email}).One(&result)
+	if err != nil {
+		log.Println("Could not find user", err)
+		return false
+	}
+
+	return result.Refresh == user.Refresh
 }

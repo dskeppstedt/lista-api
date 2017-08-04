@@ -48,12 +48,19 @@ func auth(response http.ResponseWriter, request *http.Request) {
 	}
 
 	//TODO: or if refreshtoken is present use that..
-
-	//and the password is correct
-	if !DbStore.CorrectUserPassword(user) {
-		response.WriteHeader(http.StatusForbidden)
-		fmt.Fprintln(response, "Wrong username/password combination")
-		return
+	if len(user.Refresh) > 0 {
+		if !DbStore.CorrectRefreshToken(user) {
+			response.WriteHeader(http.StatusForbidden)
+			fmt.Fprintln(response, "Wrong username/password combination")
+			return
+		}
+	} else {
+		//and the password is correct
+		if !DbStore.CorrectUserPassword(user) {
+			response.WriteHeader(http.StatusForbidden)
+			fmt.Fprintln(response, "Wrong username/password combination")
+			return
+		}
 	}
 
 	//FROM HERE THE USER IS AUTHORIZED
