@@ -29,7 +29,7 @@ func setupRoutes() {
 	http.HandleFunc("/info", timer(cors(appInfo)))
 	http.HandleFunc("/signup", timer(cors(post(signup))))
 	http.HandleFunc("/auth", timer(cors(auth)))
-	http.HandleFunc("/profile", timer(protected(profile)))
+	http.HandleFunc("/profile", timer(cors(protected(profile))))
 
 }
 
@@ -40,7 +40,7 @@ func cors(next http.HandlerFunc) http.HandlerFunc {
 
 		//		if origin := request.Header.Get("Origin"); origin != "" {
 		response.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
-		response.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		//}
 
 		if request.Method == "OPTIONS" {
