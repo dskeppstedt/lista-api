@@ -30,6 +30,7 @@ func setupRoutes() {
 	http.HandleFunc("/signup", timer(cors(post(signup))))
 	http.HandleFunc("/auth", timer(cors(auth)))
 	http.HandleFunc("/profile", timer(cors(protected(profile))))
+	http.HandleFunc("/todo", timer(cors(protected(post(CreateTodo)))))
 
 }
 
