@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"lista/api/models"
 	"lista/api/util"
-	"log"
 	"net/http"
 )
 
@@ -21,15 +20,22 @@ func CreateTodo(response http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	var newTodo models.Todo
-	error = json.Unmarshal(body, &newTodo)
+	var requestTodo models.Todo
+	error = json.Unmarshal(body, &requestTodo)
 	if error != nil {
 		response.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(response, "Malformed request")
 	}
 
+	newTodo := models.NewTodo(requestTodo.Title)
+
 	//find the user
 	user := request.Context().Value("USER-CLAIM").(util.UserClaims)
-	err := DbStore.CreateTodo(user.Email, newTodo)
-	log.Println(err)
+	err := DbStore.CreateTodo(user.Email, *newTodo)
+
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(response, "Could not save todo")
+	}
+
 }
