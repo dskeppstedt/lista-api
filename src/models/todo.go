@@ -5,9 +5,9 @@ import (
 )
 
 type Todo struct {
-	Id    bson.ObjectId `bson:"_id,omitempty"`
-	Title string
-	Done  bool
+	ID    bson.ObjectId `bson:"_id,omitempty" json:"_id,omitempty"`
+	Title string        `json:"title,omitempty"`
+	Done  bool          `json:"done,omitempty"`
 }
 
 func NewTodo(title string) *Todo {

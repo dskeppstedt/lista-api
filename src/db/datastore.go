@@ -154,3 +154,22 @@ func (this *Mongodb) ReadTodos(email string) ([]models.Todo, error) {
 	user, err := this.GetUser(email)
 	return user.Todos, err
 }
+
+func (this *Mongodb) DeleteTodo(email string, id string) error {
+	s := this.Session
+	c := s.DB("lista").C("users")
+	userQuery := bson.M{"email": email}
+	updateQuery := bson.M{"$pull": bson.M{"todos": bson.M{"_id": bson.ObjectIdHex(id)}}}
+	err := c.Update(userQuery, updateQuery)
+	log.Println("heler", err)
+	return err
+}
+
+func (this *Mongodb) UpdateTodo(email string, id string, todo models.Todo) error {
+	s := this.Session
+	c := s.DB("lista").C("users")
+	userQuery := bson.M{"email": email, "todos._id": bson.ObjectIdHex(id)}
+	updateQuery := bson.M{"$set": bson.M{"todos.$.title": todo.Title, "todos.$.done": todo.Done}}
+	err := c.Update(userQuery, updateQuery)
+	return err
+}

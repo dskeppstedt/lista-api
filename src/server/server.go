@@ -32,6 +32,8 @@ func setupRoutes() {
 	http.HandleFunc("/profile", timer(cors(protected(profile))))
 	http.HandleFunc("/todo", timer(cors(protected(post(CreateTodo)))))
 	http.HandleFunc("/todos", timer(cors(protected(ReadTodos))))
+	//handles both delete and update, will dispatch accordingly to delete/updateTodo
+	http.HandleFunc("/todo/", timer(cors(protected(ChangeTodo))))
 
 }
 
