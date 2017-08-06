@@ -14,7 +14,6 @@ func CreateTodo(response http.ResponseWriter, request *http.Request) {
 	//read request body
 	body, error := ioutil.ReadAll(request.Body)
 	if error != nil {
-
 		response.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(response, "Could not read request")
 		return
@@ -25,6 +24,7 @@ func CreateTodo(response http.ResponseWriter, request *http.Request) {
 	if error != nil {
 		response.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintln(response, "Malformed request")
+		return
 	}
 
 	newTodo := models.NewTodo(requestTodo.Title)
@@ -36,6 +36,21 @@ func CreateTodo(response http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		response.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintln(response, "Could not save todo")
+		return
 	}
 
+}
+
+func ReadTodos(response http.ResponseWriter, request *http.Request) {
+	//find the user associted with the jwt
+	user := request.Context().Value("USER-CLAIM").(util.UserClaims)
+	todos, err := DbStore.ReadTodos(user.Email)
+
+	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintln(response, "Could not read todos")
+		return
+	}
+
+	json.NewEncoder(response).Encode(todos)
 }

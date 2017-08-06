@@ -21,7 +21,7 @@ type Db interface {
 	CorrectRefreshToken()
 	//Todos
 	CreateTodo(string, models.Todo)
-	ReadTodo(string, string)
+	ReadTodos(string)
 }
 
 type Mongodb struct {
@@ -147,13 +147,10 @@ func (this *Mongodb) CreateTodo(user string, todo models.Todo) error {
 	userQuery := bson.M{"email": user}
 	updateQuery := bson.M{"$push": bson.M{"todos": todo}}
 	err := c.Update(userQuery, updateQuery)
-	// if err != nil {
-	// 	insertQuery := bson.M{"$set": {"todos":[todo]}}
-	// 	err := c.Update(userQuery,insertQuery)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	return nil
-	// }
 	return err
+}
+
+func (this *Mongodb) ReadTodos(email string) ([]models.Todo, error) {
+	user, err := this.GetUser(email)
+	return user.Todos, err
 }
