@@ -45,6 +45,7 @@ func cors(next http.HandlerFunc) http.HandlerFunc {
 		//		if origin := request.Header.Get("Origin"); origin != "" {
 		response.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 		response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		response.Header().Set("Access-Control-Allow-Methods", "GET,POST,DELETE,UPDATE")
 		//}
 
 		if request.Method == "OPTIONS" {
