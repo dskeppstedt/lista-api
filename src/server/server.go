@@ -6,6 +6,7 @@ import (
 	"lista/api/util"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"context"
@@ -15,12 +16,20 @@ import (
 )
 
 var DbStore *db.Mongodb
+var origin string
 
 //Start is used to start listening for http requests
 //Parameters:
 // - port, the port that the conneciton will use
 func Start(port string) {
 	setupRoutes()
+
+	env, set := os.LookupEnv("LISTA_CORS")
+	if !set {
+		log.Fatal("CORS is not set, fix that please")
+	}
+	origin = env
+
 	log.Println("Listening on port", port)
 	http.ListenAndServe(port, nil)
 }
@@ -42,11 +51,9 @@ func setupRoutes() {
 func cors(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 
-		//		if origin := request.Header.Get("Origin"); origin != "" {
-		response.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+		response.Header().Set("Access-Control-Allow-Origin", origin)
 		response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		response.Header().Set("Access-Control-Allow-Methods", "GET,POST,DELETE,UPDATE")
-		//}
 
 		if request.Method == "OPTIONS" {
 			response.WriteHeader(200)
