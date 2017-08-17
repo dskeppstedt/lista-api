@@ -53,7 +53,7 @@ func cors(next http.HandlerFunc) http.HandlerFunc {
 
 		response.Header().Set("Access-Control-Allow-Origin", origin)
 		response.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		response.Header().Set("Access-Control-Allow-Methods", "GET,POST,DELETE,UPDATE")
+		response.Header().Set("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT")
 
 		if request.Method == "OPTIONS" {
 			response.WriteHeader(200)
