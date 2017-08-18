@@ -95,7 +95,7 @@ func protected(next http.HandlerFunc) http.HandlerFunc {
 		var claims util.UserClaims
 
 		token, err := request.ParseFromRequestWithClaims(r, request.OAuth2Extractor, &claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte("foobar"), nil
+			return []byte(util.JwtSecure), nil
 		})
 
 		log.Println(claims)

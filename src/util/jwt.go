@@ -1,6 +1,8 @@
 package util
 
 import (
+	"log"
+	"os"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -13,6 +15,21 @@ type UserClaims struct {
 	Email string
 }
 
+var JwtSecure string
+
+func Init() {
+	readJwtSecret()
+}
+
+func readJwtSecret() {
+
+	env, set := os.LookupEnv("LISTA_JWT")
+	if !set {
+		log.Fatal("JWT not set, fix it!")
+	}
+	JwtSecure = env
+}
+
 //CreateToken will generate a jwt token with the a claim for
 //the email
 func CreateToken(email string) (string, error) {
@@ -20,5 +37,5 @@ func CreateToken(email string) (string, error) {
 	token.Claims = &UserClaims{
 		&jwt.StandardClaims{ExpiresAt: time.Now().Add(time.Minute * 10).Unix()},
 		email}
-	return token.SignedString([]byte("foobar"))
+	return token.SignedString([]byte(JwtSecure))
 }
